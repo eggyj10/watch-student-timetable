@@ -133,6 +133,9 @@ change is documented at the top of `Shared/ReminderScheduler.swift`.
 
 ## Building
 
+For the full path from a Windows machine to TestFlight, see [DEPLOY.md](DEPLOY.md).
+What follows is the short version.
+
 Requires **macOS with Xcode 15 or later**. Targets iOS 17 and watchOS 10.
 
 ### Before you build, change these
