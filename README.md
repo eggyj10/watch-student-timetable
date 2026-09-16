@@ -138,18 +138,23 @@ What follows is the short version.
 
 Requires **macOS with Xcode 15 or later**. Targets iOS 17 and watchOS 10.
 
-### Before you build, change these
+### Before you build, set your identifiers
 
-| What | Where | To |
-|------|-------|----|
-| Team ID | `project.yml` → `DEVELOPMENT_TEAM` | your 10-character Apple Developer Team ID |
-| Bundle prefix | `project.yml` (four `PRODUCT_BUNDLE_IDENTIFIER` lines) | your own reverse-domain prefix |
-| App Group | `Shared/TimetableStorage.swift` → `appGroupIdentifier`, and all three files in `Config/` | a group ID registered to your team |
+The repo ships with a placeholder bundle prefix and Team ID. One script replaces
+both everywhere they appear, across six files:
 
-The App Group must exist in your developer account (Certificates, Identifiers &
-Profiles → Identifiers → App Groups) before the entitlement will validate. All
-three targets must carry the same one — that is how the widget reads the data the
-watch app wrote.
+```bash
+./Scripts/configure.sh com.yourname A1B2C3D4E5
+```
+
+The first argument is any reverse-domain prefix that is yours; the second is the
+10-character Team ID from **Membership details** at developer.apple.com/account.
+
+You also need to register the **App Group** it prints (`group.<prefix>.timetable`)
+under Certificates, Identifiers & Profiles → Identifiers → App Groups, and tick
+it on all three app targets. That shared container is the only way the
+complication can read what the watch app wrote — if it is missing, the watch app
+works but the complication stays blank.
 
 ### Option A: XcodeGen
 
