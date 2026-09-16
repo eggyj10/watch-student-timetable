@@ -103,9 +103,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: au.com.eddiej.timetable.watchkitapp.widget
         PRODUCT_NAME: TimetableWidget
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Next Class
-        INFOPLIST_KEY_NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Config/Widget-Info.plist
         SKIP_INSTALL: YES
 
   # ------------------------------------------------------------------ Tests
