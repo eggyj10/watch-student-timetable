@@ -11,7 +11,7 @@
 name: Timetable
 
 options:
-  bundleIdPrefix: com.ejones
+  bundleIdPrefix: au.com.eddiej
   createIntermediateGroups: true
   deploymentTarget:
     iOS: "17.0"
@@ -20,7 +20,7 @@ options:
 settings:
   base:
     # Replace with your 10-character Apple Developer Team ID.
-    DEVELOPMENT_TEAM: CHANGEME99
+    DEVELOPMENT_TEAM: D74HYLMSWH
     SWIFT_VERSION: "5.9"
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
@@ -40,7 +40,7 @@ targets:
       path: Config/iOS.entitlements
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.ejones.timetable
+        PRODUCT_BUNDLE_IDENTIFIER: au.com.eddiej.timetable
         PRODUCT_NAME: Timetable
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Timetable
@@ -72,12 +72,12 @@ targets:
       path: Config/Watch.entitlements
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.ejones.timetable.watchkitapp
+        PRODUCT_BUNDLE_IDENTIFIER: au.com.eddiej.timetable.watchkitapp
         PRODUCT_NAME: Timetable
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Timetable
         INFOPLIST_KEY_WKApplication: YES
-        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.ejones.timetable
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: au.com.eddiej.timetable
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # The watch keeps its own copy of the timetable, so it must be allowed
@@ -101,7 +101,7 @@ targets:
       path: Config/Widget.entitlements
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.ejones.timetable.watchkitapp.widget
+        PRODUCT_BUNDLE_IDENTIFIER: au.com.eddiej.timetable.watchkitapp.widget
         PRODUCT_NAME: TimetableWidget
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Next Class
@@ -120,7 +120,7 @@ targets:
       - path: Shared
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.ejones.timetable.tests
+        PRODUCT_BUNDLE_IDENTIFIER: au.com.eddiej.timetable.tests
         GENERATE_INFOPLIST_FILE: YES
 
 schemes:

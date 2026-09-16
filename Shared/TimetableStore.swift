@@ -55,7 +55,7 @@ final class TimetableStore: NSObject, ObservableObject {
     /// False until the watch has received at least one payload from the phone.
     @Published private(set) var hasSyncedFromPhone: Bool
 
-    private let syncedFlagKey = "com.ejones.timetable.hasSyncedFromPhone"
+    private let syncedFlagKey = "au.com.eddiej.timetable.hasSyncedFromPhone"
 
     private override init() {
         self.timetable = TimetableStorage.load() ?? .highfieldsTerm3

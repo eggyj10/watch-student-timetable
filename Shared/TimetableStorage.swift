@@ -10,7 +10,7 @@ enum TimetableStorage {
 
     /// Must match the App Group capability on every target.
     /// Change this if you change your bundle prefix.
-    static let appGroupIdentifier = "group.com.ejones.timetable"
+    static let appGroupIdentifier = "group.au.com.eddiej.timetable"
 
     static let fileName = "timetable.json"
 
