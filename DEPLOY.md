@@ -74,6 +74,17 @@ padlock icon next to the repo name says **Private**.
 
 ---
 
+## Part 1.5 — The app icon (optional, on the Mac)
+
+The build ships a flat `AppIcon.appiconset`, which works everywhere and needs no
+attention. There is also a hand-authored Icon Composer bundle at
+`Icon/AppIcon.icon` for the iOS 26 Liquid Glass treatment — deliberately not
+wired into the build until you have opened it once on the Mac and confirmed it.
+See [Icon/README.md](Icon/README.md). Skip this entirely if you just want a
+build on your phone.
+
+---
+
 ## Part 2 — Set up the Mac
 
 ### 2.1 Xcode
