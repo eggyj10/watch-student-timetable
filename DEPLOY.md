@@ -69,7 +69,7 @@ password — GitHub stopped accepting passwords for git operations in 2021.
 
 ### 1.4 Check it
 
-Reload the repo page. You should see 34 files and one commit. Confirm the
+Reload the repo page. You should see 41 files across 4 commits. Confirm the
 padlock icon next to the repo name says **Private**.
 
 ---
