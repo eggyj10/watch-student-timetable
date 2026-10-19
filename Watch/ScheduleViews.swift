@@ -98,6 +98,12 @@ struct WeekView: View {
                     Text(store.syncState.description)
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
+                    NavigationLink {
+                        DiagnosticsView()
+                    } label: {
+                        Label("Diagnostics", systemImage: "stethoscope")
+                            .font(.system(size: 13))
+                    }
                 } header: {
                     Text(store.timetable.title)
                 }

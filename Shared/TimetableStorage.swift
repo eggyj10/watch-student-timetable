@@ -19,8 +19,14 @@ enum TimetableStorage {
     }
 
     /// App Group container if it is configured, otherwise the app's own
-    /// Documents directory. The fallback keeps the app usable if the entitlement
-    /// is missing, though the widget will not see data in that case.
+    /// Documents directory.
+    ///
+    /// The fallback keeps the app itself working, but it is a broken state, not
+    /// a supported one: each process gets its own private Documents folder, so
+    /// the watch app and the widget stop seeing the same file and the
+    /// complication silently freezes. Anything that renders this data is
+    /// expected to check `isUsingAppGroup` and say so rather than quietly
+    /// carrying on.
     static var fileURL: URL {
         if let containerURL {
             return containerURL.appendingPathComponent(fileName)
@@ -30,6 +36,42 @@ enum TimetableStorage {
     }
 
     static var isUsingAppGroup: Bool { containerURL != nil }
+
+    // MARK: Diagnostics
+
+    /// Everything needed to tell, from the watch, whether storage is healthy,
+    /// without a Mac or a debugger attached.
+    struct Diagnostics {
+        var usingAppGroup: Bool
+        var fileExists: Bool
+        var byteCount: Int?
+        var revision: Int?
+        var updatedAt: Date?
+
+        /// nil when everything is fine; otherwise what is wrong, in words.
+        var problem: String? {
+            if !usingAppGroup {
+                return "App Group missing. The widget cannot see the watch app's data."
+            }
+            if !fileExists {
+                return "No timetable saved yet. Sync from the iPhone."
+            }
+            return nil
+        }
+    }
+
+    static func diagnostics() -> Diagnostics {
+        let url = fileURL
+        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
+        let stored = load()
+        return Diagnostics(
+            usingAppGroup: isUsingAppGroup,
+            fileExists: FileManager.default.fileExists(atPath: url.path),
+            byteCount: (attributes?[.size] as? NSNumber)?.intValue,
+            revision: stored?.revision,
+            updatedAt: stored?.updatedAt
+        )
+    }
 
     private static var encoder: JSONEncoder {
         let encoder = JSONEncoder()

@@ -3,9 +3,32 @@ import WidgetKit
 
 // MARK: - Entry
 
+/// Why the widget has nothing real to show. Rendering sample data instead of
+/// saying this is what let a missing App Group masquerade as a working
+/// complication for weeks.
+enum WidgetProblem {
+    case appGroupMissing
+    case noTimetable
+
+    var short: String {
+        switch self {
+        case .appGroupMissing: return "Setup"
+        case .noTimetable: return "Sync"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .appGroupMissing: return "App Group missing"
+        case .noTimetable: return "Open app to sync"
+        }
+    }
+}
+
 struct ClassEntry: TimelineEntry {
     let date: Date
     let focus: Focus?
+    var problem: WidgetProblem?
 }
 
 // MARK: - Provider
@@ -15,11 +38,16 @@ struct NextClassProvider: TimelineProvider {
     /// The widget runs in its own process, so it reads the App Group file
     /// directly rather than touching `TimetableStore` — no point spinning up a
     /// WatchConnectivity session just to draw a complication.
-    private func loadEngine() -> ScheduleEngine {
-        let timetable = TimetableStorage.load() ?? .highfieldsTerm3
-        return ScheduleEngine(timetable: timetable)
+    /// Returns the real engine, or the reason there isn't one. Never falls back
+    /// to sample data outside the gallery placeholder: a complication showing a
+    /// plausible but wrong timetable is worse than one admitting it is broken.
+    private func loadEngine() -> Result<ScheduleEngine, WidgetProblem> {
+        guard TimetableStorage.isUsingAppGroup else { return .failure(.appGroupMissing) }
+        guard let timetable = TimetableStorage.load() else { return .failure(.noTimetable) }
+        return .success(ScheduleEngine(timetable: timetable))
     }
 
+    /// The gallery preview, where sample data is the point.
     func placeholder(in context: Context) -> ClassEntry {
         let engine = ScheduleEngine(timetable: .highfieldsTerm3)
         return ClassEntry(date: Date(), focus: engine.focus(at: Date()))
@@ -27,12 +55,29 @@ struct NextClassProvider: TimelineProvider {
 
     func getSnapshot(in context: Context, completion: @escaping (ClassEntry) -> Void) {
         let now = Date()
-        completion(ClassEntry(date: now, focus: loadEngine().focus(at: now)))
+        switch loadEngine() {
+        case .success(let engine):
+            completion(ClassEntry(date: now, focus: engine.focus(at: now)))
+        case .failure(let problem):
+            completion(ClassEntry(date: now, focus: nil, problem: problem))
+        }
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<ClassEntry>) -> Void) {
-        let engine = loadEngine()
         let now = Date()
+
+        let engine: ScheduleEngine
+        switch loadEngine() {
+        case .success(let loaded):
+            engine = loaded
+        case .failure(let problem):
+            // Retry in an hour: the fix is a rebuild or a sync, either of which
+            // also triggers an explicit reload.
+            let retry = now.addingTimeInterval(3600)
+            completion(Timeline(entries: [ClassEntry(date: now, focus: nil, problem: problem)],
+                                policy: .after(retry)))
+            return
+        }
 
         // One entry per moment the answer changes: every bell, and every
         // settle-over. Between those, the only thing moving is the relative
@@ -135,8 +180,16 @@ struct RectangularView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         } else {
-            Text("No classes")
-                .font(.system(size: 14, weight: .semibold))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Timetable")
+                    .font(.system(size: 11, weight: .heavy))
+                    .widgetAccentable()
+                Text(entry.problem?.message ?? "No classes")
+                    .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -154,7 +207,7 @@ struct InlineView: View {
             let room = focus.occurrence.room.map { " \($0)" } ?? ""
             Text("\(focus.occurrence.shortTitle)\(room) \(focus.occurrence.slot.start.display)")
         } else {
-            Text("No classes")
+            Text(entry.problem?.message ?? "No classes")
         }
     }
 }
@@ -184,7 +237,15 @@ struct CircularView: View {
                 }
                 .padding(2)
             } else {
-                Image(systemName: "graduationcap")
+                VStack(spacing: 0) {
+                    Image(systemName: entry.problem == nil ? "graduationcap" : "exclamationmark.triangle")
+                        .font(.system(size: 14))
+                    if let problem = entry.problem {
+                        Text(problem.short)
+                            .font(.system(size: 10, weight: .semibold))
+                            .minimumScaleFactor(0.6)
+                    }
+                }
             }
         }
     }
@@ -204,8 +265,8 @@ struct CornerView: View {
                     Text("\(focus.kind.label) \(focus.occurrence.title)")
                 }
         } else {
-            Image(systemName: "graduationcap")
-                .widgetLabel { Text("No classes") }
+            Image(systemName: entry.problem == nil ? "graduationcap" : "exclamationmark.triangle")
+                .widgetLabel { Text(entry.problem?.message ?? "No classes") }
         }
     }
 }

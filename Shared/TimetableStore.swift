@@ -136,11 +136,20 @@ final class TimetableStore: NSObject, ObservableObject {
     // MARK: Incoming
 
     /// Applies a payload that arrived from the counterpart device. Never echoes
-    /// back, and ignores anything not newer than what we already hold.
+    /// back.
+    ///
+    /// The watch takes whatever the phone sends, unconditionally. The phone owns
+    /// the data and the watch has no editor, so there is nothing on this side
+    /// worth protecting — whereas a staleness check here can wedge permanently:
+    /// reinstall the phone app and its revision counter restarts at 1, below
+    /// whatever the watch already holds, and every subsequent edit gets
+    /// discarded in silence.
     private func applyIncoming(_ incoming: Timetable) {
+        #if !os(watchOS)
         guard incoming.revision > timetable.revision || incoming.updatedAt > timetable.updatedAt else {
             return
         }
+        #endif
         timetable = incoming
         TimetableStorage.save(incoming)
         reloadWidgets()

@@ -46,8 +46,15 @@ struct WeekEditorView: View {
                         } label: {
                             Label("Excursions", systemImage: "bus")
                         }
+                        // The fast path at the start of a term, previously
+                        // buried two levels deep in Settings.
+                        NavigationLink {
+                            BulkTextView().environmentObject(store)
+                        } label: {
+                            Label("Edit whole term as text", systemImage: "text.alignleft")
+                        }
                     } footer: {
-                        Text("Excursions are tied to a date and take over whatever periods they overlap.")
+                        Text("Excursions are tied to a date and take over whatever periods they overlap. Bulk text editing is the quickest way to re-enter a new term.")
                     }
                 }
             }
@@ -173,6 +180,8 @@ struct CellEditorView: View {
     @State private var room = ""
     @State private var reminderOn = false
     @State private var reminderMinutes = 5
+    @State private var addingSubject = false
+    @State private var addingTeacher = false
 
     private var teacherCodes: [String] { store.timetable.teachers.keys.sorted() }
     private let colorColumns = [GridItem(.adaptive(minimum: 44), spacing: 12)]
@@ -222,6 +231,25 @@ struct CellEditorView: View {
                 }
             }
             .onAppear(perform: load)
+            .sheet(isPresented: $addingSubject) {
+                QuickAddView(kind: .subject) { code, name in
+                    store.update { timetable in
+                        let used = timetable.subjects.map(\.colorHex)
+                        timetable.subjects.removeAll { $0.code == code }
+                        timetable.subjects.append(Subject(code: code,
+                                                          name: name,
+                                                          colorHex: Palette.next(avoiding: used)))
+                        timetable.subjects.sort { $0.code < $1.code }
+                    }
+                    subjectCode = code
+                }
+            }
+            .sheet(isPresented: $addingTeacher) {
+                QuickAddView(kind: .teacher) { code, name in
+                    store.update { $0.teachers[code] = name }
+                    teacherCode = code
+                }
+            }
         }
     }
 
@@ -237,11 +265,28 @@ struct CellEditorView: View {
                 }
             }
 
+            // Creating a subject used to mean abandoning this screen, going to
+            // Settings, and coming back. New subjects turn up mid-edit far too
+            // often for that.
+            Button {
+                addingSubject = true
+            } label: {
+                Label("New subject", systemImage: "plus.circle")
+                    .font(.subheadline)
+            }
+
             Picker("Teacher", selection: $teacherCode) {
                 Text("None").tag("")
                 ForEach(teacherCodes, id: \.self) { code in
                     Text(store.timetable.teachers[code] ?? code).tag(code)
                 }
+            }
+
+            Button {
+                addingTeacher = true
+            } label: {
+                Label("New teacher", systemImage: "plus.circle")
+                    .font(.subheadline)
             }
 
             TextField("Room", text: $room)
