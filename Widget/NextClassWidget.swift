@@ -6,7 +6,7 @@ import WidgetKit
 /// Why the widget has nothing real to show. Rendering sample data instead of
 /// saying this is what let a missing App Group masquerade as a working
 /// complication for weeks.
-enum WidgetProblem {
+enum WidgetProblem: Error {
     case appGroupMissing
     case noTimetable
 
